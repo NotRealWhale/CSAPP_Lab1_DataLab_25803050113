@@ -548,17 +548,18 @@ unsigned float_i2f(int x) {
   unsigned mask;
   unsigned remainder;
   unsigned half;
+  unsigned ux = x;
 
   if(x == 0){
     return 0;
   }
 
-  sign = ((unsigned)x) & 0x80000000u;
+  sign = ux & 0x80000000u;
 
   if(sign){
-    magnitude = ~(unsigned)x + 1u;
+    magnitude = ~ux + 1u;
   }else{
-    magnitude = (unsigned)x;
+    magnitude = ux;
   }
 
   msb = 31u;
@@ -631,15 +632,26 @@ int bitCount(int x){
  *   Rating: 10
  */
 int bitReverse(int x){
-  x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
+  int mask16;
+  int mask8;
+  int mask4;
+  int mask2;
+  int mask1;
 
-  x = ((x >> 2) & 0x33333333) | ((x & 0x33333333) << 2);
+  mask16 = 0xFF | (0xFF << 8);
+  mask8 = mask16 ^ (mask16 << 8);
+  mask4 = mask8 ^ (mask8 << 4);
+  mask2 = mask4 ^ (mask4 << 2);
+  mask1 = mask2 ^ (mask2 << 1);
 
-  x = ((x >> 4) & 0x0F0F0F0F) | ((x & 0x0F0F0F0F) << 4);
+  x = ((x >> 1) & mask1) | ((x & mask1) << 1);
 
-  x = ((x >> 8) & 0x00FF00FF) | ((x & 0x00FF00FF) << 8);
+  x = ((x >> 2) & mask2) | ((x & mask2) << 2);
 
-  x = ((x >> 16) & 0x0000FFFF) | ((x & 0x0000FFFF) << 16);
+  x = ((x >> 4) & mask4) | ((x & mask4) << 4);
 
+  x = ((x >> 8) & mask8) | ((x & mask8) << 8);
+
+  x = (x << 16) | ((x >> 16) & mask16);
   return x;
 }
